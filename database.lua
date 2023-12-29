@@ -9,13 +9,7 @@ local noloc = { items = true, quests = true, objects = true, units = true }
 
 pfDB.locales = {
   ["enUS"] = "English",
-  ["koKR"] = "Korean",
-  ["frFR"] = "French",
-  ["deDE"] = "German",
-  ["zhCN"] = "Chinese",
-  ["zhTW"] = "Taiwanese",
-  ["esES"] = "Spanish",
-  ["ruRU"] = "Russian",
+  ["zhCN"] = "中文",
 }
 
 -- Patch databases to further expansions
@@ -530,9 +524,11 @@ function pfDatabase:GetRaceMaskByID(id, db)
   local raceMask = 0
 
   if db == "quests" then
+    if quests[id] then
     raceMask = quests[id]["race"] or raceMask
+    end
 
-    if (quests[id]["start"]) then
+    if quests[id] and (quests[id]["start"]) then
       local questStartRaceMask = 0
 
       -- get quest starter faction
@@ -717,7 +713,7 @@ function pfDatabase:SearchMetaRelation(query, meta, show)
 
   if pfDB["meta"] and pfDB["meta"][relname] then
     if relname == "flight" then
-      meta["texture"] = pfQuestConfig.path.."\\img\\available_c"
+      meta["texture"] = pfQuestConfig.path.."\\img\\flight"
       meta["vertex"] = { .4, 1, .4 }
 
       if relmins then

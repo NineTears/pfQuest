@@ -7,6 +7,43 @@ The addon is not designed to be a quest- or tourguide, instead the goals are to 
 
 pfQuest is the successor of [ShaguQuest](https://shagu.org/ShaguQuest/) and has been entirely written from scratch. In comparison to [ShaguQuest](https://shagu.org/ShaguQuest/), this addon does not depend on any specific map- or questlog addon. It's designed to support the default interface aswell as every other addon. In case you experience any addon conflicts, please add an issue to the bugtracker.
 
+# Downloads
+You can check the [[Latest Changes]](https://github.com/shagu/pfQuest/commits/master) page to see what has changed recently.
+
+## World of Warcraft: **Vanilla**
+1. **[[Download pfQuest]](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-full.zip)** (\*)
+2. Unpack the Zip-file
+3. Move the `pfQuest` folder into `Wow-Directory\Interface\AddOns`
+4. Restart Wow
+5. Set "Script Memory" to "0" ([HowTo](https://i.imgur.com/rZXwaK0.jpg))
+
+\*) *You can optionally pick one of the slim version downloads instead. Those version are limited to only one specific language: [English](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-enUS.zip),
+[Korean](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-koKR.zip),
+[French](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-frFR.zip),
+[German](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-deDE.zip),
+[Chinese](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-zhCN.zip),
+[Spanish](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-esES.zip),
+[Russian](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-ruRU.zip)*
+
+## World of Warcraft: **The Burning Crusade**
+1. **[[Download pfQuest]](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-full-tbc.zip)** (\*)
+2. Unpack the Zip-file
+3. Move the `pfQuest-tbc` folder into `Wow-Directory\Interface\AddOns`
+4. Restart Wow
+
+\*) *You can optionally pick one of the slim version downloads instead. Those version are limited to only one specific language: [English](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-enUS-tbc.zip),
+[Korean](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-koKR-tbc.zip),
+[French](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-frFR-tbc.zip),
+[German](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-deDE-tbc.zip),
+[Chinese](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-zhCN-tbc.zip),
+[Spanish](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-esES-tbc.zip),
+[Russian](https://github.com/shagu/pfQuest/releases/latest/download/pfQuest-ruRU-tbc.zip)*
+
+## Development Version
+The development version includes databases of all languages and client expansions. Based on the folder name, this will launch in both vanilla and tbc mode. Due to the amount of included data, this snapshot will lead to a higher RAM/Disk-Usage and slightly increased loading times.
+
+- Download via Git: [`https://github.com/shagu/pfQuest.git`](https://github.com/shagu/pfQuest.git)
+- Download via Browser: **[Zip File](https://github.com/shagu/pfQuest/archive/master.zip)**
 
 ## Controls
 - To change node colors on the World Map, **click** the node.
