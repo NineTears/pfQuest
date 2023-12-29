@@ -4,6 +4,10 @@ local _, _, _, client = GetBuildInfo()
 client = client or 11200
 local _G = client == 11200 and getfenv(0) or _G
 
+local function GetCNQuestTitleBack(title)
+	return title;
+end
+local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack												  
 pfQuest = CreateFrame("Frame")
 pfQuest.icons = {}
 
@@ -593,7 +597,6 @@ local pfHookQuestLog_Update = QuestLog_Update
 QuestLog_Update = function()
   pfHookQuestLog_Update()
 
-  if pfQuest_config["questloglevel"] == "1" then
     for i=1, QUESTS_DISPLAYED, 1 do
       local display = i + FauxScrollFrame_GetOffset(QuestLogListScrollFrame)
       local entries = GetNumQuestLogEntries()
@@ -601,11 +604,14 @@ QuestLog_Update = function()
       if display <= entries then
         local title, level, tag, header = compat.GetQuestLogTitle(display)
         if not header then
-          _G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title)
+			if pfQuest_config["questloglevel"] == "1" then
+				_G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. GetCNQuestTitle(title)) ----================2023.11.10================----
+			else
+				_G["QuestLogTitle"..i]:SetText(GetCNQuestTitle(title)) ----================2023.11.10================----
+			end
         end
       end
     end
-  end
 
   if pfQuest_config["questlogbuttons"] ==  "1" then
     local questids = pfDatabase:GetQuestIDs(GetQuestLogSelection())
@@ -676,7 +682,7 @@ if not GetQuestLink then -- Allow to send questlinks from questlog
 
       if not id or id == 0 then
         for scanID, data in pairs(pfDB["quests"]["loc"]) do
-          if data.T == questTitle then
+          if GetCNQuestTitle(data.T) == GetCNQuestTitle(questTitle) then
             id = scanID
             break
           end
