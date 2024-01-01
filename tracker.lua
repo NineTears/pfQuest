@@ -5,6 +5,17 @@ local fontsize = 12
 local panelheight = 16
 local entryheight = 20
 
+local function GetCNTextBack(text)
+	local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
+	return _, _, obj, cur, req
+end
+local GetCNText = GetCNText or GetCNTextBack
+
+local function GetCNQuestTitleBack(title)
+	return title;
+end
+local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
+
 local function HideTooltip()
   GameTooltip:Hide()
 end
@@ -32,7 +43,11 @@ local function ShowTooltip()
         if objectives and objectives > 0 then
           for i=1, objectives, 1 do
             local text, _, done = GetQuestLogLeaderBoard(i, qlogid)
-            local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
+            -- local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
+			local _, _, obj, cur, req = GetCNText(text);
+			if cur and req then
+				text = string.format("%s: %s/%s", obj, cur, req)
+			end
             if done then
               GameTooltip:AddLine(" - " .. text, 0,1,0)
             elseif cur and req then
@@ -247,7 +262,7 @@ end
 function tracker.ButtonClick()
   if arg1 == "RightButton" then
     for questid, data in pairs(pfQuest.questlog) do
-      if data.title == this.title then
+      if GetCNQuestTitle(data.title) == GetCNQuestTitle(this.title) then
         -- show questlog
         HideUIPanel(QuestLogFrame)
         SelectQuestLogEntry(data.qlogid)
@@ -301,11 +316,11 @@ end
 
 function tracker.ButtonEvent(self)
   local self   = self or this
-  local title  = self.title
+  local title  = GetCNQuestTitle(self.title)
   local node   = self.node
   local id     = self.id
   local qid    = self.questid
-
+  
   self:SetHeight(0)
 
   -- we got an event on a hidden button
@@ -379,8 +394,8 @@ function tracker.ButtonEvent(self)
 
       for i=1, objectives, 1 do
         local text, _, done = GetQuestLogLeaderBoard(i, qlogid)
-        local _, _, obj, objNum, objNeeded = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
-
+        -- local _, _, obj, objNum, objNeeded = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
+		local _, _, obj, objNum, objNeeded = GetCNText(text);
         if not self.objectives[i] then
           self.objectives[i] = self:CreateFontString(nil, "HIGH", "GameFontNormal")
           self.objectives[i]:SetFont(pfUI.font_default, fontsize)
@@ -471,13 +486,12 @@ function tracker.ButtonEvent(self)
   tracker:SetWidth(width)
 end
 
-function tracker.ButtonAdd(title, node)
+function tracker.ButtonAdd(title, ttitle, node)
   if not title or not node then return end
-
   local questid = title
   for qid, data in pairs(pfQuest.questlog) do
-    if data.title == title then
-      questid = qid
+    if GetCNQuestTitle(data.title) == GetCNQuestTitle(title) or GetCNQuestTitle(data.title) == GetCNQuestTitle(ttitle) then
+	  questid = qid
       break
     end
   end
@@ -591,11 +605,20 @@ function tracker.Reset()
   -- iterate over all quests
   for qlogid=1,40 do
     local title, level, tag, header, collapsed, complete = compat.GetQuestLogTitle(qlogid)
+	
+	local ttitle = title
+	for id, data in pairs(pfDB["quests"]["zhCN"]) do
+		if data.T == title then
+			ttitle = pfDB["quests"]["enUS"][id]["T"]
+		end
+	end
+	ttitle = GetCNQuestTitle(ttitle)
+	
     if title and not header then
       local watched = IsQuestWatched(qlogid)
       if watched then
         local img = complete and pfQuestConfig.path.."\\img\\complete_c" or pfQuestConfig.path.."\\img\\complete"
-        pfQuest.tracker.ButtonAdd(title, { dummy = true, addon = "PFQUEST", texture = img })
+        pfQuest.tracker.ButtonAdd(ttitle, ttitle, { dummy = true, addon = "PFQUEST", texture = img })
       end
 
       found = found + 1

@@ -8,6 +8,85 @@ local minimapbreakers = {
   ["ElvUI_MinimapButtons"] = true,
   ["MBB"] = true,
 }
+local function GetCNQuestTitleBack(title)
+	return title;
+end
+local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
+
+local function GetCNUnitNameBack(unit)
+	return unit;
+end
+local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
+
+local function GetCNItemNameBack(item)
+	return item;
+end
+local GetCNItemName = GetCNItemName or GetCNItemNameBack	
+
+local function GetLocalehxBack()
+	return false;
+end
+local GetLocalehx = GetLocalehx or GetLocalehxBack
+
+local function cnenItemNameBack(item, mode)
+	return item;
+end
+local cnenItemName = cnenItemName or cnenItemNameBack
+
+local function cnenItemNameBack(name, mode)
+	return name;
+end
+local cnenUnitName = cnenUnitName or cnenUnitNameBack
+
+-- local function cnenItemName(item, mode)
+	-- if GetLocale() == "zhCN" or GetLocalehx then
+		-- if mode == 0 then   --汉译英
+			-- local enitemname = item
+			-- for iid, cnitemname in pairs(pfDB["items"]["zhCN"]) do
+				-- if cnitemname == item then
+					-- enitemname = pfDB["items"]["enUS"][iid]
+					-- return enitemname
+				-- end	
+			-- end
+		-- end
+		-- if mode == 1 then   --英译汉
+			-- local cnitemname = item
+			-- for iid, enitemname in pairs(pfDB["items"]["enUS"]) do
+				-- if enitemname == item then
+					-- cnitemname = pfDB["items"]["zhCN"][iid]
+					-- return cnitemname
+				-- end	
+			-- end
+			-- return GetCNItemName(item)
+		-- end
+	-- end
+	-- return item
+-- end
+
+-- local function cnenUnitName(name, mode)
+	-- if GetLocale() == "zhCN" or GetLocalehx then
+		-- if mode == "cntoen" then   --汉译英
+			-- local enunitname = name
+			-- for iid, cnunitname in pairs(pfDB["units"]["zhCN"]) do
+				-- if cnunitname == name then
+					-- enunitname = pfDB["units"]["enUS"][iid]
+					-- return enunitname
+				-- end	
+			-- end
+		-- end
+		-- if mode == "entocn" then   --英译汉
+			-- local cnunitname = name
+			-- for iid, enunitname in pairs(pfDB["units"]["enUS"]) do
+				-- if enunitname == name then
+					-- cnunitname = pfDB["units"]["zhCN"][iid]
+					-- return cnunitname
+				-- end	
+			-- end
+			-- return GetCNUnitName(name)
+		-- end
+	-- end
+	-- return name
+-- end
 
 local compatnamefake = CreateFrame("Frame")
 compatnamefake:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -209,6 +288,17 @@ pfMap.tooltip:SetScript("OnShow", function()
   if pfQuest_config.showtooltips == "0" then return end
 
   local name = getglobal("GameTooltipTextLeft1") and getglobal("GameTooltipTextLeft1"):GetText()
+  
+  if name ~= cnenUnitName(name, "entocn") then
+	local tname = name
+	name = cnenUnitName(name, "entocn")
+	getglobal("GameTooltipTextLeft1"):SetText(name)
+  elseif name ~= cnenItemName(name, "entocn") then
+	local tname = name
+	name = cnenItemName(name, "entocn")
+	getglobal("GameTooltipTextLeft1"):SetText(name.."\n"..tname)
+  end
+  
   local zone = pfMap:GetMapID(GetCurrentMapContinent(), GetCurrentMapZone())
 
   if name and pfMap.tooltips[name] and pfMap.tooltips[name] then
@@ -269,13 +359,13 @@ function pfMap:ShowTooltip(meta, tooltip)
     for qid=1, GetNumQuestLogEntries() do
       local qtitle, _, _, _, _, complete = compat.GetQuestLogTitle(qid)
 
-      if meta["quest"] == qtitle then
+      if meta["quest"] == GetCNQuestTitle(qtitle) then
         -- handle active quests
         local objectives = GetNumQuestLeaderBoards(qid)
         catch = true
 
         local symbol = ( complete or objectives == 0 ) and "|cff555555[|cffffcc00?|cff555555]|r " or "|cff555555[|cffffcc00!|cff555555]|r "
-        tooltip:AddLine(symbol .. meta["quest"], 1, 1, 0)
+        tooltip:AddLine(symbol .. GetCNQuestTitle(meta["quest"]), 1, 1, 0)
 
         if objectives then
           for i=1, objectives, 1 do
@@ -284,22 +374,27 @@ function pfMap:ShowTooltip(meta, tooltip)
             if type == "monster" then
               -- kill
               local i, j, monsterName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_MONSTERS_KILLED))
-              if monsterName and meta["spawn"] == monsterName then
+              if monsterName and meta["spawn"] == cnenUnitName(monsterName, 1) then
                 catch_obj = true
                 local r,g,b = pfMap.tooltip:GetColor(objNum, objNeeded)
-                tooltip:AddLine("|cffaaaaaa- |r" .. monsterName .. ": " .. objNum .. "/" .. objNeeded, r, g, b)
+                tooltip:AddLine("|cffaaaaaa- |r" .. cnenUnitName(monsterName, 1) .. ": " .. objNum .. "/" .. objNeeded, r, g, b)
               end
             elseif table.getn(meta["item"]) > 0 and type == "item" and meta["droprate"] then
               -- loot
               local i, j, itemName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
 
-              for mid, item in pairs(meta["item"]) do
-                if item == itemName then
+              for mid, item in pairs(meta["item"]) do			
+				local enitemname = cnenItemName(item, "cntoen")
+				local cnitemname = cnenItemName(item, "entocn")
+		
+                -- if GetCNItemName(titem) == GetCNItemName(itemName) then
+                if enitemname == itemName or cnitemname == itemName then
                   catch_obj = true
                   local r,g,b = pfMap.tooltip:GetColor(objNum, objNeeded)
                   local dr,dg,db = pfMap.tooltip:GetColor(tonumber(meta["droprate"]), 100)
                   local lootcolor = string.format("%02x%02x%02x", dr * 255,dg * 255, db * 255)
-                  tooltip:AddLine("|cffaaaaaa- |r" .. itemName .. ": " .. objNum .. "/" .. objNeeded .. " |cff555555[|cff" .. lootcolor .. meta["droprate"] .. "%|cff555555]", r, g, b)
+                  -- tooltip:AddLine("|cffaaaaaa- |r" .. GetCNItemName(itemName) .. ": " .. objNum .. "/" .. objNeeded .. " |cff555555[|cff" .. lootcolor .. meta["droprate"] .. "%|cff555555]", r, g, b)
+                  tooltip:AddLine("|cffaaaaaa- |r" .. cnenItemName(itemName, "entocn") .. ": " .. objNum .. "/" .. objNeeded .. " |cff555555[|cff" .. lootcolor .. meta["droprate"] .. "%|cff555555]", r, g, b)
                 end
               end
             elseif table.getn(meta["item"]) > 0 and type == "item" and meta["sellcount"] then
@@ -307,11 +402,14 @@ function pfMap:ShowTooltip(meta, tooltip)
               local i, j, itemName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
 
               for mid, item in pairs(meta["item"]) do
-                if item == itemName then
+				local enitemname = cnenItemName(item, "cntoen")
+				local cnitemname = cnenItemName(item, "entocn")
+                -- if GetCNItemName(item) == GetCNItemName(itemName) then
+                if enitemname == itemName or cnitemname == itemName then
                   catch_obj = true
                   local r,g,b = pfMap.tooltip:GetColor(objNum, objNeeded)
                   local sellcount = tonumber(meta["sellcount"]) > 0 and " |cff555555[|cffcccccc" .. meta["sellcount"] .. "x" .. "|cff555555]" or ""
-                  tooltip:AddLine("|cffaaaaaa- |r" .. pfQuest_Loc["Buy"] .. ": " .. itemName .. ": " .. objNum .. "/" .. objNeeded .. sellcount, r, g, b)
+                  tooltip:AddLine("|cffaaaaaa- |r" .. pfQuest_Loc["Buy"] .. ": " .. cnenItemName(itemName, "entocn") .. ": " .. objNum .. "/" .. objNeeded .. sellcount, r, g, b)
                 end
               end
             end
@@ -825,7 +923,14 @@ function pfMap:UpdateNodes()
         else
           -- populate quest list on map
           for title, node in pairs(pfMap.pins[i].node) do
-            pfQuest.tracker.ButtonAdd(title, node)
+			local ttitle = title
+			for id, data in pairs(pfDB["quests"]["zhCN"]) do
+				if data.T == title then
+					ttitle = pfDB["quests"]["enUS"][id]["T"]
+				end
+			end
+			ttitle = GetCNQuestTitle(ttitle)
+            pfQuest.tracker.ButtonAdd(title, ttitle, node)
           end
 
           x = x / 100 * WorldMapButton:GetWidth()
