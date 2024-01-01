@@ -38,56 +38,6 @@ local function cnenItemNameBack(name, mode)
 end
 local cnenUnitName = cnenUnitName or cnenUnitNameBack
 
--- local function cnenItemName(item, mode)
-	-- if GetLocale() == "zhCN" or GetLocalehx then
-		-- if mode == 0 then   --汉译英
-			-- local enitemname = item
-			-- for iid, cnitemname in pairs(pfDB["items"]["zhCN"]) do
-				-- if cnitemname == item then
-					-- enitemname = pfDB["items"]["enUS"][iid]
-					-- return enitemname
-				-- end	
-			-- end
-		-- end
-		-- if mode == 1 then   --英译汉
-			-- local cnitemname = item
-			-- for iid, enitemname in pairs(pfDB["items"]["enUS"]) do
-				-- if enitemname == item then
-					-- cnitemname = pfDB["items"]["zhCN"][iid]
-					-- return cnitemname
-				-- end	
-			-- end
-			-- return GetCNItemName(item)
-		-- end
-	-- end
-	-- return item
--- end
-
--- local function cnenUnitName(name, mode)
-	-- if GetLocale() == "zhCN" or GetLocalehx then
-		-- if mode == "cntoen" then   --汉译英
-			-- local enunitname = name
-			-- for iid, cnunitname in pairs(pfDB["units"]["zhCN"]) do
-				-- if cnunitname == name then
-					-- enunitname = pfDB["units"]["enUS"][iid]
-					-- return enunitname
-				-- end	
-			-- end
-		-- end
-		-- if mode == "entocn" then   --英译汉
-			-- local cnunitname = name
-			-- for iid, enunitname in pairs(pfDB["units"]["enUS"]) do
-				-- if enunitname == name then
-					-- cnunitname = pfDB["units"]["zhCN"][iid]
-					-- return cnunitname
-				-- end	
-			-- end
-			-- return GetCNUnitName(name)
-		-- end
-	-- end
-	-- return name
--- end
-
 local compatnamefake = CreateFrame("Frame")
 compatnamefake:RegisterEvent("PLAYER_ENTERING_WORLD")
 compatnamefake:SetScript("OnEvent", function()
