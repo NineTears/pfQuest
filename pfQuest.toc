@@ -1,7 +1,9 @@
 ## Interface: 11200
-## Title: |cff33ffccpf|cffffffffQuest
-## Author: Shagu（Wind、名字不好起修改）
-## Notes: A Questhelper and Database
+## Title: |cff33ffccpf|cffffffffQuest |cffcccccc[中文版4.00]|R
+## Title-zhCN: |cff33ffccpf|cffffffffQuest |cffcccccc[中文版4.00]|R
+## Author: Shagu, Wind, 呲不鸟, 名字不好起
+## Notes: |cff33ffccpf|cffffffffQuest |cffcccccc[中文版]|R由|cff33ffccNineTears(Wind)|R、|cff33ffcc呲不鸟|R、|cff33ffcc名字不好起|R修改完善。
+## Notes-zhCN: |cff33ffccpf|cffffffffQuest |cffcccccc[中文版]|R由|cff33ffccNineTears(Wind)|R、|cff33ffcc呲不鸟|R、|cff33ffcc名字不好起|R修改完善。
 ## Notes-ruRU: Облегченный помощник заданий и база данных
 ## Version: 6.8.13
 ## OptionalDeps: pfUI
