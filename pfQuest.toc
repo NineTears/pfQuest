@@ -1,9 +1,9 @@
 ## Interface: 11200
-## Title: |cff33ffccpf|cffffffffQuest-|RzhCN |cffcccccc[红星4.00]|R
-## Title-zhCN: |cff33ffccpf|cffffffffQuest-|RzhCN |cffcccccc[红星4.00]|R
+## Title: |cff33ffccpf|cffffffffQuest-|RzhCN |cffff1450[红星4.00]|R
+## Title-zhCN: |cff33ffccpf|cffffffffQuest-|RzhCN |cffff1450[红星4.00]|R
 ## Author: Shagu, NineTears(Wind), 呲不鸟, 名字不好起
-## Notes: |cff33ffccpf|cffffffffQuest-|RzhCN |cffcccccc[红星]|R版本由|cff33ffccNineTears(Wind)|R&|cff33ffcc呲不鸟|R&|cff33ffcc名字不好起|R修改汉化。|N本插件完全免费，请勿在第三方购买！
-## Notes-zhCN: |cff33ffccpf|cffffffffQuest-|RzhCN |cffcccccc[红星]|R版本由|cff33ffccNineTears(Wind)|R&|cff33ffcc呲不鸟|R&|cff33ffcc名字不好起|R修改汉化。|N本插件完全免费，请勿在第三方购买！
+## Notes: |cff33ffccpf|cffffffffQuest-|RzhCN |cffff1450[红星]|R版本由|cff33ffccNineTears(Wind)|R&|cff33ffcc呲不鸟|R&|cff33ffcc名字不好起|R修改汉化。|N本插件完全免费，请勿在第三方购买！
+## Notes-zhCN: |cff33ffccpf|cffffffffQuest-|RzhCN |cffff1450[红星]|R版本由|cff33ffccNineTears(Wind)|R&|cff33ffcc呲不鸟|R&|cff33ffcc名字不好起|R修改汉化。|N本插件完全免费，请勿在第三方购买！
 ## Notes-ruRU: Облегченный помощник заданий и база данных
 ## Version: 6.8.13
 ## OptionalDeps: pfUI
