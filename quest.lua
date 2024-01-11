@@ -4,10 +4,21 @@ local _, _, _, client = GetBuildInfo()
 client = client or 11200
 local _G = client == 11200 and getfenv(0) or _G
 
-local function GetCNQuestTitleBack(title)
-	return title;
+local function cnenItemNameBack(item, mode)
+	return item;
 end
-local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack												  
+local cnenItemName = cnenItemName or cnenItemNameBack
+
+local function cnenUnitNameBack(name, mode)
+	return name;
+end
+local cnenUnitName = cnenUnitName or cnenUnitNameBack
+
+function cnenQuestTitleBack(title, mode)
+	return title
+end
+local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
+
 pfQuest = CreateFrame("Frame")
 pfQuest.icons = {}
 
@@ -603,11 +614,15 @@ QuestLog_Update = function()
 
       if display <= entries then
         local title, level, tag, header = compat.GetQuestLogTitle(display)
+		if GetLocale() == "zhCN" then
+			title = cnenQuestTitle(title, "entocn")
+		end
+		
         if not header then
 			if pfQuest_config["questloglevel"] == "1" then
-				_G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. enQuestTitleTocnQuestTitle(title)) ----================2023.11.10================----
+				_G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title) ----================2023.11.10================----
 			else
-				_G["QuestLogTitle"..i]:SetText(enQuestTitleTocnQuestTitle(title)) ----================2023.11.10================----
+				_G["QuestLogTitle"..i]:SetText(title) ----================2023.11.10================----
 			end
         end
       end
@@ -677,12 +692,14 @@ if not GetQuestLink then -- Allow to send questlinks from questlog
       ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
 
       local hasTitle, _, questTitle = string.find(text, ".*|h%[(.*)%]|h.*")
-
+	  if GetLocale() == "zhCN" then
+		questTitle = cnenQuestTitle(questTitle, "entocn")
+	  end
       id = tonumber(id)
 
       if not id or id == 0 then
         for scanID, data in pairs(pfDB["quests"]["loc"]) do
-          if GetCNQuestTitle(data.T) == GetCNQuestTitle(questTitle) then
+          if data.T == questTitle then
             id = scanID
             break
           end
@@ -700,7 +717,7 @@ if not GetQuestLink then -- Allow to send questlinks from questlog
 
       -- scan for active quests
       local queststate = pfQuest_history[id] and 2 or 0
-      queststate = pfQuest.questlog[id] and 1 or nil
+      queststate = pfQuest.questlog[id] and 1 or queststate
 
       if queststate == 0 then
         ItemRefTooltip:AddLine(pfQuest_Loc["You don't have this quest."] .. "\n\n", 1, .5, .5)

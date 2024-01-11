@@ -12,24 +12,24 @@ else
 	noloc = { items = true, quests = true, objects = true, units = true }
 end
 
-local function GetCNQuestTitleBack(title)
-	return title;
-end
-local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
-
-local function GetCNItemNameBack(item)
-	return item;
-end
-local GetCNItemName = GetCNItemName or GetCNItemNameBack
-
 local function cnenItemNameBack(item, mode)
 	return item;
 end
 local cnenItemName = cnenItemName or cnenItemNameBack
 
+local function cnenUnitNameBack(name, mode)
+	return name;
+end
+local cnenUnitName = cnenUnitName or cnenUnitNameBack
+
+function cnenQuestTitleBack(title, mode)
+	return title
+end
+local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
+
 pfDB.locales = {
   ["enUS"] = "English",
-  ["zhCN"] = "中文",
+  ["zhCN"] = "简体中文",
 }
 
 -- Patch databases to further expansions
@@ -374,7 +374,7 @@ function pfDatabase:IsFriendly(id)
 end
 
 function pfDatabase:BuildQuestDescription(meta)
-  if not meta.title or not meta.quest or not meta.QTYPE then return end
+  if not meta.title or not meta.quest or not meta.QTYPE then return meta.description end
 
   if meta.QTYPE == "NPC_START" then
     return string.format(pfQuest_Loc["Speak with |cff33ffcc%s|r to obtain |cffffcc00[!]|cff33ffcc %s|r"], (meta.spawn or UNKNOWN), (meta.quest or UNKNOWN))
@@ -1467,6 +1467,11 @@ function pfDatabase:GetQuestIDs(qid)
   SelectQuestLogEntry(qid)
   local text, objective = GetQuestLogQuestText()
   local title, level, _, header = compat.GetQuestLogTitle(qid)
+  
+ 	if GetLocale() == "zhCN" then
+		title = cnenQuestTitle(title, "entocn")
+	end
+  
   SelectQuestLogEntry(oldID)
 
   if header or not title then return end
@@ -1491,15 +1496,8 @@ function pfDatabase:GetQuestIDs(qid)
   local tcount = 0
   -- check if multiple quests share the same name
   for id, data in pairs(pfDB["quests"]["loc"]) do
-    if quests[id] and GetCNQuestTitle(data.T) == GetCNQuestTitle(title) then tcount = tcount + 1 end
+    if quests[id] and data.T == title then tcount = tcount + 1 end
   end
-
-	if tcount == 0 then
-		for id, data in pairs(pfDB["quests"]["enUS"]) do
-			if quests[id] and data.T == title then tcount = tcount + 1 end
-		end	
-	end
-
 
   -- no title was found, run levenshtein on titles
   if tcount == 0 and title then
@@ -1536,7 +1534,7 @@ function pfDatabase:GetQuestIDs(qid)
     local score1 = 0
     local score2 = 0
 
-    if quests[id] and data.T and GetCNQuestTitle(data.T) == GetCNQuestTitle(title) then
+    if quests[id] and data.T and data.T == title then
       -- low score for same name
       score = 1
 

@@ -5,16 +5,48 @@ local fontsize = 12
 local panelheight = 16
 local entryheight = 20
 
-local function GetCNTextBack(text)
-	local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
-	return _, _, obj, cur, req
-end
-local GetCNText = GetCNText or GetCNTextBack
+-- local function GetCNQuestTitleBack(title)
+	-- return title;
+-- end
+-- local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
 
-local function GetCNQuestTitleBack(title)
-	return title;
+local function cnenItemNameBack(item, mode)
+	return item;
 end
-local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
+local cnenItemName = cnenItemName or cnenItemNameBack
+
+local function cnenUnitNameBack(name, mode)
+	return name;
+end
+local cnenUnitName = cnenUnitName or cnenUnitNameBack
+
+function cnenQuestTitleBack(title, mode)
+	return title
+end
+local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
+
+local function GetCNText(text)
+	if text == nil then return end
+	local obj, cur, req, objtemp
+	if GetLocale() == "zhCN" then
+		local bekill = strfind(text, "已杀死")
+		if bekill then
+			_, _, obj, cur, req = strfind(text, pfUI.api.SanitizePattern(QUEST_MONSTERS_KILLED))
+		else
+			_, _, obj, cur, req = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
+		end
+
+		if bekill then
+			objtemp = "已杀死 " .. cnenUnitName(obj, "entocn")
+		else
+			objtemp = cnenItemName(obj, "entocn")
+		end
+		obj = objtemp
+	else
+		local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")	
+	end
+	return  _, _, obj, cur, req
+end
 
 local function HideTooltip()
   GameTooltip:Hide()
@@ -43,7 +75,6 @@ local function ShowTooltip()
         if objectives and objectives > 0 then
           for i=1, objectives, 1 do
             local text, _, done = GetQuestLogLeaderBoard(i, qlogid)
-            -- local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
 			local _, _, obj, cur, req = GetCNText(text);
 			if cur and req then
 				text = string.format("%s: %s/%s", obj, cur, req)
@@ -262,13 +293,23 @@ end
 function tracker.ButtonClick()
   if arg1 == "RightButton" then
     for questid, data in pairs(pfQuest.questlog) do
-      if GetCNQuestTitle(data.title) == GetCNQuestTitle(this.title) then
-        -- show questlog
-        HideUIPanel(QuestLogFrame)
-        SelectQuestLogEntry(data.qlogid)
-        ShowUIPanel(QuestLogFrame)
-        break
-      end
+		if GetLocale() == "zhCN" then
+		  if cnenQuestTitle(data.title, "entocn") == this.title then
+			-- show questlog
+			HideUIPanel(QuestLogFrame)
+			SelectQuestLogEntry(data.qlogid)
+			ShowUIPanel(QuestLogFrame)
+			break
+		  end
+		else
+		  if data.title == this.title then
+			-- show questlog
+			HideUIPanel(QuestLogFrame)
+			SelectQuestLogEntry(data.qlogid)
+			ShowUIPanel(QuestLogFrame)
+			break
+		  end			
+		end
     end
   elseif IsShiftKeyDown() then
     -- mark as done if node is quest and not in questlog
@@ -316,7 +357,7 @@ end
 
 function tracker.ButtonEvent(self)
   local self   = self or this
-  local title  = GetCNQuestTitle(self.title)
+  local title  = self.title
   local node   = self.node
   local id     = self.id
   local qid    = self.questid
@@ -490,7 +531,9 @@ function tracker.ButtonAdd(title, ttitle, node)
   if not title or not node then return end
   local questid = title
   for qid, data in pairs(pfQuest.questlog) do
-    if GetCNQuestTitle(data.title) == GetCNQuestTitle(title) or GetCNQuestTitle(data.title) == GetCNQuestTitle(ttitle) then
+	-- DEFAULT_CHAT_FRAME:AddMessage(title)
+	-- DEFAULT_CHAT_FRAME:AddMessage(data.title)
+    if data.title == title or data.title == ttitle then
 	  questid = qid
       break
     end
@@ -513,7 +556,7 @@ function tracker.ButtonAdd(title, ttitle, node)
 
   -- skip duplicate titles
   for bid, button in pairs(tracker.buttons) do
-    if button.title and button.title == title then
+    if button.title and (button.title == title or button.title == ttitle) then
       if node.dummy or not node.texture then
         -- We found a node icon (1st prio)
         -- use the ID and update the button
@@ -606,19 +649,13 @@ function tracker.Reset()
   for qlogid=1,40 do
     local title, level, tag, header, collapsed, complete = compat.GetQuestLogTitle(qlogid)
 	
-	local ttitle = title
-	for id, data in pairs(pfDB["quests"]["zhCN"]) do
-		if data.T == title then
-			ttitle = pfDB["quests"]["enUS"][id]["T"]
-		end
-	end
-	ttitle = GetCNQuestTitle(ttitle)
-	
+	local ttitle = cnenQuestTitle(title, "entocn")
+
     if title and not header then
       local watched = IsQuestWatched(qlogid)
       if watched then
         local img = complete and pfQuestConfig.path.."\\img\\complete_c" or pfQuestConfig.path.."\\img\\complete"
-        pfQuest.tracker.ButtonAdd(ttitle, ttitle, { dummy = true, addon = "PFQUEST", texture = img })
+        pfQuest.tracker.ButtonAdd(title, ttitle, { dummy = true, addon = "PFQUEST", texture = img })
       end
 
       found = found + 1

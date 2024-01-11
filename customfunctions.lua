@@ -1,30 +1,35 @@
 
-local function GetCNQuestTitleBack(title)
-	return title;
-end
-local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
-
-local function GetCNItemNameBack(item)
-	return item;
-end
-local GetCNItemName = GetCNItemName or GetCNItemNameBack
-
-local function GetCNUnitNameBack(unit)
-	return unit;
-end
-local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
-
-function enQuestTitleTocnQuestTitle(title)
-	if title == nil then return end
+function cnenQuestTitle(title, mode)
+	if title == nil then return end	
 	if GetLocale() == "zhCN" then
-		local ttitle = title
-		for id, data in pairs(pfDB["quests"]["enUS"]) do
-			if data.T == title and pfDB["quests"]["zhCN"][id] then
-				ttitle = pfDB["quests"]["zhCN"][id]["T"]
-				return ttitle
+		if mode == "cntoen" then   --汉译英
+			local entitle
+			for id, data in pairs(pfDB["quests"]["zhCN"]) do
+				if data.T == title and pfDB["quests"]["enUS"][id] then
+					entitle = pfDB["quests"]["enUS"][id]["T"]
+					if entitle then
+						return entitle
+					else
+						return title
+					end
+				end
 			end
+			return title		
 		end
-		return GetCNQuestTitle(title)
+		if mode == "entocn" then   --英译汉
+			local cntitle
+			for id, data in pairs(pfDB["quests"]["enUS"]) do
+				if data.T == title and pfDB["quests"]["zhCN"][id] then
+					cntitle = pfDB["quests"]["zhCN"][id]["T"]
+					if cntitle then
+						return cntitle
+					else
+						return title
+					end
+				end
+			end
+			return title
+		end
 	end
 	return title
 end
@@ -33,23 +38,32 @@ function cnenItemName(item, mode)
 	if item == nil then return end
 	if GetLocale() == "zhCN" then
 		if mode == "cntoen" then   --汉译英
-			local enitemname = item
-			for iid, cnitemname in pairs(pfDB["items"]["zhCN"]) do
-				if cnitemname == item and pfDB["items"]["enUS"][iid] then
-					enitemname = pfDB["items"]["enUS"][iid]
-					return enitemname
+			local enitemname
+			for id, cnitemname in pairs(pfDB["items"]["zhCN"]) do
+				if cnitemname == item and pfDB["items"]["enUS"] then
+					enitemname = pfDB["items"]["enUS"][id]
+					if enitemname then
+						return enitemname
+					else
+						return item
+					end
 				end	
 			end
+			return item
 		end
 		if mode == "entocn" then   --英译汉
-			local cnitemname = item
-			for iid, enitemname in pairs(pfDB["items"]["enUS"]) do
-				if enitemname == item and pfDB["items"]["zhCN"][iid] then
-					cnitemname = pfDB["items"]["zhCN"][iid]
-					return cnitemname
-				end	
+			local cnitemname
+			for id, enitemname in pairs(pfDB["items"]["enUS"]) do
+				if enitemname == item and pfDB["items"]["zhCN"] then
+					cnitemname = pfDB["items"]["zhCN"][id]
+					if cnitemname then
+						return cnitemname
+					else
+						return item
+					end
+				end
 			end
-			return GetCNItemName(item)
+			return item
 		end
 	end
 	return item
@@ -60,46 +74,32 @@ function cnenUnitName(name, mode)
 	if GetLocale() == "zhCN" then
 		if mode == "cntoen" then   --汉译英
 			local enunitname = name
-			for iid, cnunitname in pairs(pfDB["units"]["zhCN"]) do
-				if cnunitname == name and pfDB["units"]["enUS"][iid] then
-					enunitname = pfDB["units"]["enUS"][iid]
-					return enunitname
+			for id, cnunitname in pairs(pfDB["units"]["zhCN"]) do
+				if cnunitname == name and pfDB["units"]["enUS"][id] then
+					enunitname = pfDB["units"]["enUS"][id]
+					if enunitname then
+						return enunitname
+					else
+						return name
+					end
 				end	
 			end
+			return name
 		end
 		if mode == "entocn" then   --英译汉
-			local cnunitname = name
-			for iid, enunitname in pairs(pfDB["units"]["enUS"]) do
-				if enunitname == name and pfDB["units"]["zhCN"][iid] then
-					cnunitname = pfDB["units"]["zhCN"][iid]
-					return cnunitname
-				end	
+			local cnunitname
+			for id, enunitname in pairs(pfDB["units"]["enUS"]) do
+				if enunitname == name and pfDB["units"]["zhCN"][id] then
+					cnunitname = pfDB["units"]["zhCN"][id]
+					if cnunitname then
+						return cnunitname
+					else
+						return name
+					end
+				end
 			end
-			return GetCNUnitName(name)
+			return name
 		end
 	end
 	return name
-end
-
-function GetCNText(text)
-	if text == nil then return end
-	local obj, cur, req, objtemp
-	if GetLocale() == "zhCN" then
-		local bekill = strfind(text, "已杀死")
-		if bekill then
-			_, _, obj, cur, req = strfind(text, pfUI.api.SanitizePattern(QUEST_MONSTERS_KILLED))
-		else
-			_, _, obj, cur, req = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
-		end
-
-		if bekill then
-			objtemp = "已杀死 " .. cnenUnitName(obj, "entocn")
-		else
-			objtemp = cnenItemName(obj, "entocn")
-		end
-		obj = objtemp
-	else
-		local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")	
-	end
-	return  _, _, obj, cur, req
 end
