@@ -5,12 +5,12 @@ client = client or 11200
 local _G = client == 11200 and getfenv(0) or _G
 
 local function cnenItemNameBack(item, mode)
-	return item;
+	return item
 end
 local cnenItemName = cnenItemName or cnenItemNameBack
 
 local function cnenUnitNameBack(name, mode)
-	return name;
+	return name
 end
 local cnenUnitName = cnenUnitName or cnenUnitNameBack
 

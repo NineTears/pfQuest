@@ -10,12 +10,12 @@ local minimapbreakers = {
 }
 
 local function cnenItemNameBack(item, mode)
-	return item;
+	return item
 end
 local cnenItemName = cnenItemName or cnenItemNameBack
 
 local function cnenUnitNameBack(name, mode)
-	return name;
+	return name
 end
 local cnenUnitName = cnenUnitName or cnenUnitNameBack
 
