@@ -4,18 +4,18 @@ local _, _, _, client = GetBuildInfo()
 client = client or 11200
 local _G = client == 11200 and getfenv(0) or _G
 
-local function cnenItemNameBack(item, mode)
-	return item
+local function GetCNItemNameBack(item)
+	return item;
 end
-local cnenItemName = cnenItemName or cnenItemNameBack
+local GetCNItemName = GetCNItemName or GetCNItemNameBack
 
-local function cnenUnitNameBack(name, mode)
-	return name
+local function GetCNUnitNameBack(unit)
+	return unit;
 end
-local cnenUnitName = cnenUnitName or cnenUnitNameBack
+local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
 function cnenQuestTitleBack(title, mode)
-	return title
+	return title;
 end
 local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 

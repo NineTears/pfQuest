@@ -12,18 +12,18 @@ else
 	noloc = { items = true, quests = true, objects = true, units = true }
 end
 
-local function cnenItemNameBack(item, mode)
-	return item
+local function GetCNItemNameBack(item)
+	return item;
 end
-local cnenItemName = cnenItemName or cnenItemNameBack
+local GetCNItemName = GetCNItemName or GetCNItemNameBack
 
-local function cnenUnitNameBack(name, mode)
-	return name
+local function GetCNUnitNameBack(unit)
+	return unit;
 end
-local cnenUnitName = cnenUnitName or cnenUnitNameBack
+local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
 function cnenQuestTitleBack(title, mode)
-	return title
+	return title;
 end
 local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 
@@ -1138,7 +1138,7 @@ function pfDatabase:SearchQuestID(id, meta, maps)
         -- item data
         if type == "item" then
           local i, j, itemName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
-		  itemName = cnenItemName(itemName, "entocn")
+		  itemName = GetCNItemName(itemName)
           for id in pairs(pfDatabase:GetIDByName(itemName, "items")) do
             parse_obj["I"][id] = ( objNum + 0 >= objNeeded + 0 or done ) and "DONE" or "PROG"
           end

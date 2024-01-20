@@ -33,7 +33,7 @@ function cnenQuestTitle(title, mode)
 	end
 	return title
 end
-
+--[[临时禁用，解决亚服中文端任务怪击杀和任务物品拾取卡顿问题
 function cnenItemName(item, mode)
 	if item == nil then return end
 	if GetLocale() == "zhCN" then
@@ -103,3 +103,4 @@ function cnenUnitName(name, mode)
 	end
 	return name
 end
+]]

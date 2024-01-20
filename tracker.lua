@@ -10,18 +10,18 @@ local entryheight = 20
 -- end
 -- local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
 
-local function cnenItemNameBack(item, mode)
-	return item
+local function GetCNItemNameBack(item)
+	return item;
 end
-local cnenItemName = cnenItemName or cnenItemNameBack
+local GetCNItemName = GetCNItemName or GetCNItemNameBack
 
-local function cnenUnitNameBack(name, mode)
-	return name
+local function GetCNUnitNameBack(unit)
+	return unit;
 end
-local cnenUnitName = cnenUnitName or cnenUnitNameBack
+local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
 function cnenQuestTitleBack(title, mode)
-	return title
+	return title;
 end
 local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 
@@ -37,9 +37,9 @@ local function GetCNText(text)
 		end
 
 		if bekill then
-			objtemp = "已杀死 " .. cnenUnitName(obj, "entocn")
+			objtemp = "已杀死 " .. GetCNUnitName(obj)
 		else
-			objtemp = cnenItemName(obj, "entocn")
+			objtemp = GetCNItemName(obj)
 		end
 		obj = objtemp
 	else

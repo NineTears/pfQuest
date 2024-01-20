@@ -9,18 +9,18 @@ local minimapbreakers = {
   ["MBB"] = true,
 }
 
-local function cnenItemNameBack(item, mode)
-	return item
+local function GetCNItemNameBack(item)
+	return item;
 end
-local cnenItemName = cnenItemName or cnenItemNameBack
+local GetCNItemName = GetCNItemName or GetCNItemNameBack
 
-local function cnenUnitNameBack(name, mode)
-	return name
+local function GetCNUnitNameBack(unit)
+	return unit;
 end
-local cnenUnitName = cnenUnitName or cnenUnitNameBack
+local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
 function cnenQuestTitleBack(title, mode)
-	return title
+	return title;
 end
 local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 
@@ -225,19 +225,11 @@ pfMap.tooltip:SetScript("OnShow", function()
   if pfQuest_config.showtooltips == "0" then return end
 
   local name = getglobal("GameTooltipTextLeft1") and getglobal("GameTooltipTextLeft1"):GetText()
-  
-  if name ~= cnenUnitName(name, "entocn") then
-	local tname = name
-	name = cnenUnitName(name, "entocn")
-	-- getglobal("GameTooltipTextLeft1"):SetText(name)
-	-- GameTooltip:Show()
-  elseif name ~= cnenItemName(name, "entocn") then
-	local tname = name
-	name = cnenItemName(name, "entocn")
-	-- getglobal("GameTooltipTextLeft1"):SetText(name.."\n"..tname)
-	-- GameTooltip:Show()
-  end
-  
+  if name ~= GetCNUnitName(name) then
+	name = GetCNUnitName(name)
+  elseif name ~= GetCNItemName(name) then
+	name = GetCNItemName(name)
+  end		 
   local zone = pfMap:GetMapID(GetCurrentMapContinent(), GetCurrentMapZone())
 
   if name and pfMap.tooltips[name] and pfMap.tooltips[name] then
@@ -317,45 +309,34 @@ function pfMap:ShowTooltip(meta, tooltip)
             if type == "monster" then
               -- kill
               local i, j, monsterName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_MONSTERS_KILLED))
-			  
-			  if GetLocale() == "zhCN" then
-				monsterName = cnenUnitName(monsterName, "entocn")	
-			  end
-			  
-              if monsterName and meta["spawn"] == monsterName then
+              if monsterName and meta["spawn"] == GetCNUnitName(monsterName) then
                 catch_obj = true
                 local r,g,b = pfMap.tooltip:GetColor(objNum, objNeeded)
-                tooltip:AddLine("|cffaaaaaa- |r" .. monsterName .. ": " .. objNum .. "/" .. objNeeded, r, g, b)
+                tooltip:AddLine("|cffaaaaaa- |r" .. GetCNUnitName(monsterName) .. ": " .. objNum .. "/" .. objNeeded, r, g, b)
               end
             elseif table.getn(meta["item"]) > 0 and type == "item" and meta["droprate"] then
               -- loot
               local i, j, itemName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
-			  if GetLocale() == "zhCN" then
-				itemName = cnenItemName(itemName, "entocn")	
-			  end
+
               for mid, item in pairs(meta["item"]) do
-		
-                if item == itemName then
+                if item == GetCNItemName(itemName) then
                   catch_obj = true
                   local r,g,b = pfMap.tooltip:GetColor(objNum, objNeeded)
                   local dr,dg,db = pfMap.tooltip:GetColor(tonumber(meta["droprate"]), 100)
                   local lootcolor = string.format("%02x%02x%02x", dr * 255,dg * 255, db * 255)
-                  tooltip:AddLine("|cffaaaaaa- |r" .. itemName .. ": " .. objNum .. "/" .. objNeeded .. " |cff555555[|cff" .. lootcolor .. meta["droprate"] .. "%|cff555555]", r, g, b)
+                  tooltip:AddLine("|cffaaaaaa- |r" .. GetCNItemName(itemName) .. ": " .. objNum .. "/" .. objNeeded .. " |cff555555[|cff" .. lootcolor .. meta["droprate"] .. "%|cff555555]", r, g, b)
                 end
               end
             elseif table.getn(meta["item"]) > 0 and type == "item" and meta["sellcount"] then
               -- vendor
-              local i, j, itemName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))		  
-			  if GetLocale() == "zhCN" then
-				itemName = cnenItemName(itemName, "entocn")	
-			  end
-			  
+              local i, j, itemName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
+
               for mid, item in pairs(meta["item"]) do
-                if item == itemName then
+                if item == GetCNItemName(itemName) then
                   catch_obj = true
                   local r,g,b = pfMap.tooltip:GetColor(objNum, objNeeded)
                   local sellcount = tonumber(meta["sellcount"]) > 0 and " |cff555555[|cffcccccc" .. meta["sellcount"] .. "x" .. "|cff555555]" or ""
-                  tooltip:AddLine("|cffaaaaaa- |r" .. pfQuest_Loc["Buy"] .. ": " .. itemName .. ": " .. objNum .. "/" .. objNeeded .. sellcount, r, g, b)
+                  tooltip:AddLine("|cffaaaaaa- |r" .. pfQuest_Loc["Buy"] .. ": " .. GetCNItemName(itemName) .. ": " .. objNum .. "/" .. objNeeded .. sellcount, r, g, b)
                 end
               end
             end
@@ -776,6 +757,7 @@ function pfMap:UpdateNode(frame, node, color, obj)
       frame.quest       = tab.quest
       frame.qlvl        = tab.qlvl
       frame.itemreq     = tab.itemreq
+      frame.arrow       = tab.arrow
 
       if pfQuest_config["spawncolors"] == "1" then
         frame.color = tab.spawn or tab.title
