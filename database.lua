@@ -22,10 +22,10 @@ local function GetCNUnitNameBack(unit)
 end
 local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
-function cnenQuestTitleBack(title, mode)
+local function GetCNQuestTitleBack(title)
 	return title;
 end
-local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
+local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
 
 pfDB.locales = {
   ["enUS"] = "English",
@@ -545,7 +545,7 @@ function pfDatabase:GetRaceMaskByID(id, db)
 
   if db == "quests" then
     if quests[id] then
-		raceMask = quests[id]["race"] or raceMask
+      raceMask = quests[id]["race"] or raceMask
     end
 
     if quests[id] and (quests[id]["start"]) then
@@ -1467,11 +1467,6 @@ function pfDatabase:GetQuestIDs(qid)
   SelectQuestLogEntry(qid)
   local text, objective = GetQuestLogQuestText()
   local title, level, _, header = compat.GetQuestLogTitle(qid)
-  
- 	if GetLocale() == "zhCN" then
-		title = cnenQuestTitle(title, "entocn")
-	end
-  
   SelectQuestLogEntry(oldID)
 
   if header or not title then return end
@@ -1496,7 +1491,7 @@ function pfDatabase:GetQuestIDs(qid)
   local tcount = 0
   -- check if multiple quests share the same name
   for id, data in pairs(pfDB["quests"]["loc"]) do
-    if quests[id] and data.T == title then tcount = tcount + 1 end
+    if quests[id] and GetCNQuestTitle(data.T) == GetCNQuestTitle(title) then tcount = tcount + 1 end
   end
 
   -- no title was found, run levenshtein on titles
@@ -1534,7 +1529,7 @@ function pfDatabase:GetQuestIDs(qid)
     local score1 = 0
     local score2 = 0
 
-    if quests[id] and data.T and data.T == title then
+    if quests[id] and data.T and GetCNQuestTitle(data.T) == GetCNQuestTitle(title) then
       -- low score for same name
       score = 1
 

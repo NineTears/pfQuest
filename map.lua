@@ -19,11 +19,10 @@ local function GetCNUnitNameBack(unit)
 end
 local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
-function cnenQuestTitleBack(title, mode)
+local function GetCNQuestTitleBack(title)
 	return title;
 end
-local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
-
+local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
 
 local compatnamefake = CreateFrame("Frame")
 compatnamefake:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -290,17 +289,13 @@ function pfMap:ShowTooltip(meta, tooltip)
     for qid=1, GetNumQuestLogEntries() do
       local qtitle, _, _, _, _, complete = compat.GetQuestLogTitle(qid)
 
-		if GetLocale() == "zhCN" then
-			qtitle = cnenQuestTitle(qtitle, "entocn")	
-		end
-		
-      if meta["quest"] == qtitle then
+      if meta["quest"] == GetCNQuestTitle(qtitle) then
         -- handle active quests
         local objectives = GetNumQuestLeaderBoards(qid)
         catch = true
 
         local symbol = ( complete or objectives == 0 ) and "|cff555555[|cffffcc00?|cff555555]|r " or "|cff555555[|cffffcc00!|cff555555]|r "
-        tooltip:AddLine(symbol .. meta["quest"], 1, 1, 0)
+        tooltip:AddLine(symbol .. GetCNQuestTitle(meta["quest"]), 1, 1, 0)
 
         if objectives then
           for i=1, objectives, 1 do
@@ -868,8 +863,7 @@ function pfMap:UpdateNodes()
         else
           -- populate quest list on map
           for title, node in pairs(pfMap.pins[i].node) do
-			local ttitle = cnenQuestTitle(title, "cntoen")
-            pfQuest.tracker.ButtonAdd(title, ttitle, node)
+            pfQuest.tracker.ButtonAdd(title, node)
           end
 
           x = x / 100 * WorldMapButton:GetWidth()

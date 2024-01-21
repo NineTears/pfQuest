@@ -14,10 +14,10 @@ local function GetCNUnitNameBack(unit)
 end
 local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
-function cnenQuestTitleBack(title, mode)
+local function GetCNQuestTitleBack(title)
 	return title;
 end
-local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
+local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack	
 
 pfQuest = CreateFrame("Frame")
 pfQuest.icons = {}
@@ -614,19 +614,15 @@ QuestLog_Update = function()
 
       if display <= entries then
         local title, level, tag, header = compat.GetQuestLogTitle(display)
-		if GetLocale() == "zhCN" then
-			title = cnenQuestTitle(title, "entocn")
-		end
-		
         if not header then
-			if pfQuest_config["questloglevel"] == "1" then
-				_G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title) ----================2023.11.10================----
-			else
-				_G["QuestLogTitle"..i]:SetText(title) ----================2023.11.10================----
-			end
-        end
+          if pfQuest_config["questloglevel"] == "1" then
+              _G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. GetCNQuestTitle(title)) ----================2023.11.10================----
+          else
+              _G["QuestLogTitle"..i]:SetText(GetCNQuestTitle(title)) ----================2023.11.10================----
+          end
       end
-
+    end
+  end
 
   if pfQuest_config["questlogbuttons"] ==  "1" then
     local questids = pfDatabase:GetQuestIDs(GetQuestLogSelection())
@@ -692,14 +688,12 @@ if not GetQuestLink then -- Allow to send questlinks from questlog
       ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
 
       local hasTitle, _, questTitle = string.find(text, ".*|h%[(.*)%]|h.*")
-	  if GetLocale() == "zhCN" then
-		questTitle = cnenQuestTitle(questTitle, "entocn")
-	  end
+
       id = tonumber(id)
 
       if not id or id == 0 then
         for scanID, data in pairs(pfDB["quests"]["loc"]) do
-          if data.T == questTitle then
+          if GetCNQuestTitle(data.T) == GetCNQuestTitle(questTitle) then
             id = scanID
             break
           end
