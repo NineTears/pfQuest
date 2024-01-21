@@ -626,7 +626,7 @@ QuestLog_Update = function()
 			end
         end
       end
-    end
+
 
   if pfQuest_config["questlogbuttons"] ==  "1" then
     local questids = pfDatabase:GetQuestIDs(GetQuestLogSelection())
