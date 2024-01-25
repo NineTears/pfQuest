@@ -10,17 +10,17 @@ local minimapbreakers = {
 }
 
 local function GetCNItemNameBack(item)
-	return item;
+	return item
 end
 local GetCNItemName = GetCNItemName or GetCNItemNameBack
 
 local function GetCNUnitNameBack(unit)
-	return unit;
+	return unit
 end
 local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
 local function GetCNQuestTitleBack(title)
-	return title;
+	return title
 end
 local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
 

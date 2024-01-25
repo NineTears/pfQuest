@@ -5,17 +5,17 @@ client = client or 11200
 local _G = client == 11200 and getfenv(0) or _G
 
 local function GetCNItemNameBack(item)
-	return item;
+	return item
 end
 local GetCNItemName = GetCNItemName or GetCNItemNameBack
 
 local function GetCNUnitNameBack(unit)
-	return unit;
+	return unit
 end
 local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
 
 local function GetCNQuestTitleBack(title)
-	return title;
+	return title
 end
 local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack	
 
