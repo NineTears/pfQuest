@@ -5,20 +5,25 @@ local fontsize = 12
 local panelheight = 16
 local entryheight = 20
 
-local function GetCNItemNameBack(item)
+-- local function GetCNQuestTitleBack(title)
+	-- return title;
+-- end
+-- local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
+
+local function cnenItemNameBack(item, mode)
 	return item
 end
-local GetCNItemName = GetCNItemName or GetCNItemNameBack
+local cnenItemName = cnenItemName or cnenItemNameBack
 
-local function GetCNUnitNameBack(unit)
-	return unit
+local function cnenUnitNameBack(name, mode)
+	return name
 end
-local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
+local cnenUnitName = cnenUnitName or cnenUnitNameBack
 
-local function GetCNQuestTitleBack(title)
+function cnenQuestTitleBack(title, mode)
 	return title
 end
-local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
+local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 
 local function GetCNText(text)
 	if text == nil then return end
@@ -32,9 +37,9 @@ local function GetCNText(text)
 		end
 
 		if bekill then
-			objtemp = "已杀死 " .. GetCNUnitName(obj)
+			objtemp = "已杀死 " .. cnenUnitName(obj, "entocn")
 		else
-			objtemp = GetCNItemName(obj)
+			objtemp = cnenItemName(obj, "entocn")
 		end
 		obj = objtemp
 	else
@@ -70,7 +75,6 @@ local function ShowTooltip()
         if objectives and objectives > 0 then
           for i=1, objectives, 1 do
             local text, _, done = GetQuestLogLeaderBoard(i, qlogid)
-            -- local _, _, obj, cur, req = strfind(gsub(text, "\239\188\154", ":"), "(.*):%s*([%d]+)%s*/%s*([%d]+)")
 			local _, _, obj, cur, req = GetCNText(text);
 			if cur and req then
 				text = string.format("%s: %s/%s", obj, cur, req)
@@ -288,14 +292,14 @@ end
 
 function tracker.ButtonClick()
   if arg1 == "RightButton" then
-    for questid, data in pairs(pfQuest.questlog) do
-      if GetCNQuestTitle(data.title) == GetCNQuestTitle(this.title) then
-        -- show questlog
-        HideUIPanel(QuestLogFrame)
-        SelectQuestLogEntry(data.qlogid)
-        ShowUIPanel(QuestLogFrame)
-        break
-      end
+	for questid, data in pairs(pfQuest.questlog) do
+	  if cnenQuestTitle(data.title, "entocn") == this.title or data.title == this.title then
+		-- show questlog
+		HideUIPanel(QuestLogFrame)
+		SelectQuestLogEntry(data.qlogid)
+		ShowUIPanel(QuestLogFrame)
+		break
+	  end
     end
   elseif IsShiftKeyDown() then
     -- mark as done if node is quest and not in questlog
@@ -343,11 +347,11 @@ end
 
 function tracker.ButtonEvent(self)
   local self   = self or this
-  local title  = GetCNQuestTitle(self.title)
+  local title  = self.title
   local node   = self.node
   local id     = self.id
   local qid    = self.questid
-
+  
   self:SetHeight(0)
 
   -- we got an event on a hidden button
@@ -451,7 +455,7 @@ function tracker.ButtonEvent(self)
 
     self.tracked = watched
     self.perc = percent
-    self.text:SetText(string.format("%s%s |cffaaaaaa(%s%s%%|cffaaaaaa)|r", showlevel, title or "", colorperc or "", ceil(percent)))
+    self.text:SetText(string.format("%s%s |cffaaaaaa(%s%s%%|cffaaaaaa)|r", showlevel, cnenQuestTitle(title, "entocn") or "", colorperc or "", ceil(percent)))
     self.text:SetTextColor(color.r, color.g, color.b)
     self.tooltip = pfQuest_Loc["|cff33ffcc<Click>|r Unfold/Fold Objectives\n|cff33ffcc<Right-Click>|r Show In QuestLog\n|cff33ffcc<Ctrl-Click>|r Show Map / Toggle Color\n|cff33ffcc<Shift-Click>|r Hide Nodes"]
   elseif tracker.mode == "GIVER_TRACKING" then
@@ -513,12 +517,14 @@ function tracker.ButtonEvent(self)
   tracker:SetWidth(width)
 end
 
-function tracker.ButtonAdd(title, node)
+function tracker.ButtonAdd(title, ttitle, node)
   if not title or not node then return end
   local questid = title
   for qid, data in pairs(pfQuest.questlog) do
-    if GetCNQuestTitle(data.title) == GetCNQuestTitle(title) then
-      questid = qid
+	-- DEFAULT_CHAT_FRAME:AddMessage(title)
+	-- DEFAULT_CHAT_FRAME:AddMessage(data.title)
+    if data.title == title or data.title == ttitle then
+	  questid = qid
       break
     end
   end
@@ -540,7 +546,7 @@ function tracker.ButtonAdd(title, node)
 
   -- skip duplicate titles
   for bid, button in pairs(tracker.buttons) do
-    if button.title and button.title == title then
+    if button.title and (button.title == title or button.title == ttitle) then
       if node.dummy or not node.texture then
         -- We found a node icon (1st prio)
         -- use the ID and update the button
@@ -632,12 +638,14 @@ function tracker.Reset()
   -- iterate over all quests
   for qlogid=1,40 do
     local title, level, tag, header, collapsed, complete = compat.GetQuestLogTitle(qlogid)
-	title = GetCNQuestTitle(title)
+	
+	local ttitle = cnenQuestTitle(title, "entocn")
+
     if title and not header then
       local watched = IsQuestWatched(qlogid)
       if watched then
         local img = complete and pfQuestConfig.path.."\\img\\complete_c" or pfQuestConfig.path.."\\img\\complete"
-        pfQuest.tracker.ButtonAdd(title, { dummy = true, addon = "PFQUEST", texture = img })
+        pfQuest.tracker.ButtonAdd(title, ttitle, { dummy = true, addon = "PFQUEST", texture = img })
       end
 
       found = found + 1

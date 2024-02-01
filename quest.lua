@@ -4,20 +4,20 @@ local _, _, _, client = GetBuildInfo()
 client = client or 11200
 local _G = client == 11200 and getfenv(0) or _G
 
-local function GetCNItemNameBack(item)
+local function cnenItemNameBack(item, mode)
 	return item
 end
-local GetCNItemName = GetCNItemName or GetCNItemNameBack
+local cnenItemName = cnenItemName or cnenItemNameBack
 
-local function GetCNUnitNameBack(unit)
-	return unit
+local function cnenUnitNameBack(name, mode)
+	return name
 end
-local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
+local cnenUnitName = cnenUnitName or cnenUnitNameBack
 
-local function GetCNQuestTitleBack(title)
+function cnenQuestTitleBack(title, mode)
 	return title
 end
-local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack	
+local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 
 pfQuest = CreateFrame("Frame")
 pfQuest.icons = {}
@@ -614,15 +614,16 @@ QuestLog_Update = function()
 
       if display <= entries then
         local title, level, tag, header = compat.GetQuestLogTitle(display)
+		title = cnenQuestTitle(title, "entocn")
         if not header then
-          if pfQuest_config["questloglevel"] == "1" then
-              _G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. GetCNQuestTitle(title)) ----================2023.11.10================----
-          else
-              _G["QuestLogTitle"..i]:SetText(GetCNQuestTitle(title)) ----================2023.11.10================----
-          end
+			if pfQuest_config["questloglevel"] == "1" then
+				_G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title) ----================2023.11.10================----
+			else
+				_G["QuestLogTitle"..i]:SetText(title) ----================2023.11.10================----
+			end
+        end
       end
     end
-  end
 
   if pfQuest_config["questlogbuttons"] ==  "1" then
     local questids = pfDatabase:GetQuestIDs(GetQuestLogSelection())
@@ -688,12 +689,12 @@ if not GetQuestLink then -- Allow to send questlinks from questlog
       ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
 
       local hasTitle, _, questTitle = string.find(text, ".*|h%[(.*)%]|h.*")
-
+	  questTitle = cnenQuestTitle(questTitle, "entocn")
       id = tonumber(id)
 
       if not id or id == 0 then
         for scanID, data in pairs(pfDB["quests"]["loc"]) do
-          if GetCNQuestTitle(data.T) == GetCNQuestTitle(questTitle) then
+          if data.T == questTitle then
             id = scanID
             break
           end

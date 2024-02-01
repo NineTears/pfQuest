@@ -12,24 +12,24 @@ else
 	noloc = { items = true, quests = true, objects = true, units = true }
 end
 
-local function GetCNItemNameBack(item)
+local function cnenItemNameBack(item, mode)
 	return item
 end
-local GetCNItemName = GetCNItemName or GetCNItemNameBack
+local cnenItemName = cnenItemName or cnenItemNameBack
 
-local function GetCNUnitNameBack(unit)
-	return unit
+local function cnenUnitNameBack(name, mode)
+	return name
 end
-local GetCNUnitName = GetCNUnitName or GetCNUnitNameBack
+local cnenUnitName = cnenUnitName or cnenUnitNameBack
 
-local function GetCNQuestTitleBack(title)
+function cnenQuestTitleBack(title, mode)
 	return title
 end
-local GetCNQuestTitle = GetCNQuestTitle or GetCNQuestTitleBack
+local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 
 pfDB.locales = {
   ["enUS"] = "English",
-  ["zhCN"] = "简体中文",
+  ["zhCN"] = "简体",
 }
 
 -- Patch databases to further expansions
@@ -545,7 +545,7 @@ function pfDatabase:GetRaceMaskByID(id, db)
 
   if db == "quests" then
     if quests[id] then
-      raceMask = quests[id]["race"] or raceMask
+		raceMask = quests[id]["race"] or raceMask
     end
 
     if quests[id] and (quests[id]["start"]) then
@@ -1126,7 +1126,8 @@ function pfDatabase:SearchQuestID(id, meta, maps)
         -- spawn data
         if type == "monster" then
           local i, j, monsterName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_MONSTERS_KILLED))
-          for id in pairs(pfDatabase:GetIDByName(monsterName, "units")) do
+		  monsterName = cnenUnitName(monsterName, "entocn")
+		  for id in pairs(pfDatabase:GetIDByName(monsterName, "units")) do
             parse_obj["U"][id] = ( objNum + 0 >= objNeeded + 0 or done ) and "DONE" or "PROG"
           end
 
@@ -1138,7 +1139,7 @@ function pfDatabase:SearchQuestID(id, meta, maps)
         -- item data
         if type == "item" then
           local i, j, itemName, objNum, objNeeded = strfind(text, pfUI.api.SanitizePattern(QUEST_OBJECTS_FOUND))
-		  itemName = GetCNItemName(itemName)
+		  itemName = cnenItemName(itemName, "entocn")
           for id in pairs(pfDatabase:GetIDByName(itemName, "items")) do
             parse_obj["I"][id] = ( objNum + 0 >= objNeeded + 0 or done ) and "DONE" or "PROG"
           end
@@ -1467,156 +1468,163 @@ function pfDatabase:GetQuestIDs(qid)
   SelectQuestLogEntry(qid)
   local text, objective = GetQuestLogQuestText()
   local title, level, _, header = compat.GetQuestLogTitle(qid)
+
+  title = cnenQuestTitle(title, "entocn")
+
   SelectQuestLogEntry(oldID)
 
-  if header or not title then return end
-  local identifier = title .. ":" .. ( level or "") .. ":" .. ( objective or "") .. ":" .. ( text or "")
+	if header or not title then return end
+	local identifier = title .. ":" .. ( level or "") .. ":" .. ( objective or "") .. ":" .. ( text or "")
 
-  -- always make sure the quest-cache exists
-  pfQuest_questcache = pfQuest_questcache or {}
+	-- always make sure the quest-cache exists
+	pfQuest_questcache = pfQuest_questcache or {}
 
-  if pfQuest_questcache[identifier] and pfQuest_questcache[identifier][1] then
-    return pfQuest_questcache[identifier]
-  end
+	if pfQuest_questcache[identifier] and pfQuest_questcache[identifier][1] then
+	return pfQuest_questcache[identifier]
+	end
 
-  local _, race = UnitRace("player")
-  local prace = pfDatabase:GetBitByRace(race)
-  local _, class = UnitClass("player")
-  local pclass = pfDatabase:GetBitByClass(class)
+	local _, race = UnitRace("player")
+	local prace = pfDatabase:GetBitByRace(race)
+	local _, class = UnitClass("player")
+	local pclass = pfDatabase:GetBitByClass(class)
 
-  local best = 0
-  local best1 = 0
-  local results = {}
+	local best = 0
+	local best1 = 0
+	local results = {}
 
-  local tcount = 0
-  -- check if multiple quests share the same name
-  for id, data in pairs(pfDB["quests"]["loc"]) do
-    if quests[id] and GetCNQuestTitle(data.T) == GetCNQuestTitle(title) then tcount = tcount + 1 end
-  end
+	local tcount = 0
+	-- check if multiple quests share the same name
+	for id, data in pairs(pfDB["quests"]["loc"]) do
+	if quests[id] and data.T == title then tcount = tcount + 1 end
+	end
 
-  -- no title was found, run levenshtein on titles
-  if tcount == 0 and title then
-    local tlen = string.len(title)
-    local tscore, tbest, ttitle = nil, math.min(tlen/2, 5), nil
-    for id, data in pairs(pfDB["quests"]["loc"]) do
-      if quests[id] and data.T then
-        tscore = lev(data.T, title, tbest)
-        if tscore < tbest then
-          tbest = tscore
-          ttitle = data.T
-        end
-      end
-    end
+	-- no title was found, run levenshtein on titles
+	if tcount == 0 and title then
+	local tlen = string.len(title)
+	local tscore, tbest, ttitle = nil, math.min(tlen/2, 5), nil
+		for id, data in pairs(pfDB["quests"]["loc"]) do
+		  if quests[id] and data.T then
+			tscore = lev(data.T, title, tbest)
+			if tscore < tbest then
+			  tbest = tscore
+			  ttitle = data.T
+			end
+		  end
+		end
 
-    if not ttitle then
-      -- return early on unknown quests.
-      if not pfDatabase.localized then
-        -- skip cache if locale-checks are still running
-        return { title }
-      else
-        -- flag quest as unknown and return
-        pfQuest_questcache[identifier] = { title }
-        return pfQuest_questcache[identifier]
-      end
-    else
-      -- set title to best result
-      title = ttitle
-    end
-  end
+		if not ttitle then
+		  -- return early on unknown quests.
+		  if not pfDatabase.localized then
+			-- skip cache if locale-checks are still running
+			return { title }
+		  else
+			-- flag quest as unknown and return
+			pfQuest_questcache[identifier] = { title }
+			return pfQuest_questcache[identifier]
+		  end
+		else
+		  -- set title to best result
+		  title = ttitle
+		end
+	end
 
-  for id, data in pairs(pfDB["quests"]["loc"]) do
-    local score = 0
-    local score1 = 0
-    local score2 = 0
+	for id, data in pairs(pfDB["quests"]["loc"]) do
+	local score = 0
+	local score1 = 0
+	local score2 = 0
 
-    if quests[id] and data.T and GetCNQuestTitle(data.T) == GetCNQuestTitle(title) then
-      -- low score for same name
-      score = 1
+		if quests[id] and data.T and data.T == title then
+		  -- low score for same name
+		  score = 1
 
-      -- check level and set score
-      if quests[id]["lvl"] == level then
-        score = score + 8
-      end
+		  -- check level and set score
+		  if quests[id]["lvl"] == level then
+			score = score + 8
+		  end
 
-      -- check race and set score
-      if quests[id]["race"] and ( bit.band(quests[id]["race"], prace) == prace ) then
-        score = score + 8
-      end
+		  -- check race and set score
+		  if quests[id]["race"] and ( bit.band(quests[id]["race"], prace) == prace ) then
+			score = score + 8
+		  end
 
-      -- check class and set score
-      if quests[id]["class"] and ( bit.band(quests[id]["class"], pclass) == pclass ) then
-        score = score + 8
-      end
+		  -- check class and set score
+		  if quests[id]["class"] and ( bit.band(quests[id]["class"], pclass) == pclass ) then
+			score = score + 8
+		  end
 
-      -- if multiple quests share the same name, use levenshtein algorithm,
-      -- to compare quest text distances in order to estimate the best quest id
-      if tcount > 1 then
+		  -- if multiple quests share the same name, use levenshtein algorithm,
+		  -- to compare quest text distances in order to estimate the best quest id
+		  if tcount > 1 then
+			if loc == "zhCN" then
+				if containsChinese(objective) then
+					score1 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["O"]), objective, 24),0)				
+				else
+					score2 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["O"]), objective, 24),0)
+				end
+				if containsChinese(text) then
+					score1 = score1 + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["D"]), text, 24),0)
+				else
+					score2 = score2 + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["D"]), text, 24),0)
+				end
+			else
+				score1 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["O"]), objective, 24),0)
+				-- check description and calculate score
+				score1 = score1 + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["D"]), text, 24),0)
+			end
+		  end
+		  score = max(score, score1, score2)
+		  if score > best then best = score end
+		  results[score] = results[score] or {}
+		  if score > 0 then table.insert(results[score], id) end
+		end
+	end
+
+  -- for id, data in pairs(pfDB["quests"]["enUS"]) do
+    -- local score = 0
+    -- local score1 = 0
+    -- local score2 = 0
+
+    -- if quests[id] and data.T and data.T == title then
+      -- -- low score for same name
+      -- score = 1
+
+      -- -- check level and set score
+      -- if quests[id]["lvl"] == level then
+        -- score = score + 8
+      -- end
+
+      -- -- check race and set score
+      -- if quests[id]["race"] and ( bit.band(quests[id]["race"], prace) == prace ) then
+        -- score = score + 8
+      -- end
+
+      -- -- check class and set score
+      -- if quests[id]["class"] and ( bit.band(quests[id]["class"], pclass) == pclass ) then
+        -- score = score + 8
+      -- end
+
+      -- -- if multiple quests share the same name, use levenshtein algorithm,
+      -- -- to compare quest text distances in order to estimate the best quest id
+      -- if tcount > 1 then
 	  
-        score1 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["O"]), objective, 24),0)
+        -- score1 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["O"]), objective, 24),0)
 
-        -- check description and calculate score
-        score1 = score1 + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["D"]), text, 24),0)	  
+        -- -- check description and calculate score
+        -- score1 = score1 + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["D"]), text, 24),0)	  
 	  	  
-        -- check objective and calculate score
-        score2 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["O"]), objective, 24),0)
+        -- -- check objective and calculate score
+        -- score2 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["O"]), objective, 24),0)
 
-        -- check description and calculate score
-        score2 = score2 + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["D"]), text, 24),0)
+        -- -- check description and calculate score
+        -- score2 = score2 + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["D"]), text, 24),0)
 		
-      end
-	  score = max(score, score1, score2)
-      if score > best then best = score end
-      results[score] = results[score] or {}
-      if score > 0 then table.insert(results[score], id) end
-    end
-  end
-
-  for id, data in pairs(pfDB["quests"]["enUS"]) do
-    local score = 0
-    local score1 = 0
-    local score2 = 0
-
-    if quests[id] and data.T and data.T == title then
-      -- low score for same name
-      score = 1
-
-      -- check level and set score
-      if quests[id]["lvl"] == level then
-        score = score + 8
-      end
-
-      -- check race and set score
-      if quests[id]["race"] and ( bit.band(quests[id]["race"], prace) == prace ) then
-        score = score + 8
-      end
-
-      -- check class and set score
-      if quests[id]["class"] and ( bit.band(quests[id]["class"], pclass) == pclass ) then
-        score = score + 8
-      end
-
-      -- if multiple quests share the same name, use levenshtein algorithm,
-      -- to compare quest text distances in order to estimate the best quest id
-      if tcount > 1 then
-	  
-        score1 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["O"]), objective, 24),0)
-
-        -- check description and calculate score
-        score1 = score1 + max(24 - lev(pfDatabase:FormatQuestText(pfDB.quests.loc[id]["D"]), text, 24),0)	  
-	  	  
-        -- check objective and calculate score
-        score2 = score + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["O"]), objective, 24),0)
-
-        -- check description and calculate score
-        score2 = score2 + max(24 - lev(pfDatabase:FormatQuestText(pfDB["quests"]["enUS"][id]["D"]), text, 24),0)
-		
-      end
-	  score = max(score, score1, score2)
-      if score > best1 then best1 = score end
-      results[score] = results[score] or {}
-      if score > 0 then table.insert(results[score], id) end
-    end
-  end  
+      -- end
+	  -- score = max(score, score1, score2)
+      -- if score > best1 then best1 = score end
+      -- results[score] = results[score] or {}
+      -- if score > 0 then table.insert(results[score], id) end
+    -- end
+  -- end  
 
   -- cache for next time
   best = max(best, best1)
