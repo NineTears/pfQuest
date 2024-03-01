@@ -152,8 +152,8 @@ tracker:SetScript("OnUpdate", function()
     this.backdrop:SetAlpha(alpha + ((goal - alpha) > 0 and .1 or (goal - alpha) < 0 and -.1 or 0))
   end
 
-  if QuestWatchFrame:IsShown() then
-    QuestWatchFrame:Hide()
+  if pfQuestCompat.QuestWatchFrame:IsShown() then
+    pfQuestCompat.QuestWatchFrame:Hide()
   end
 end)
 
@@ -292,14 +292,14 @@ end
 
 function tracker.ButtonClick()
   if arg1 == "RightButton" then
-	for questid, data in pairs(pfQuest.questlog) do
-	  if cnenQuestTitle(data.title, "entocn") == this.title or data.title == this.title then
-		-- show questlog
-		HideUIPanel(QuestLogFrame)
-		SelectQuestLogEntry(data.qlogid)
-		ShowUIPanel(QuestLogFrame)
-		break
-	  end
+    for questid, data in pairs(pfQuest.questlog) do
+        if cnenQuestTitle(data.title, "entocn") == this.title or data.title == this.title then
+        -- show questlog
+        HideUIPanel(QuestLogFrame)
+        SelectQuestLogEntry(data.qlogid)
+        ShowUIPanel(QuestLogFrame)
+        break
+      end
     end
   elseif IsShiftKeyDown() then
     -- mark as done if node is quest and not in questlog
@@ -315,7 +315,7 @@ function tracker.ButtonClick()
     pfQuest.updateQuestGivers = true
   elseif IsControlKeyDown() and not WorldMapFrame:IsShown() then
     -- show world map
-    WorldMapFrame:Show()
+    ToggleWorldMap()
   elseif IsControlKeyDown() and pfQuest_config["spawncolors"] == "0" then
     -- switch color
     pfQuest_colors[this.title] = { pfMap.str2rgb(this.title .. GetTime()) }
@@ -351,7 +351,7 @@ function tracker.ButtonEvent(self)
   local node   = self.node
   local id     = self.id
   local qid    = self.questid
-  
+
   self:SetHeight(0)
 
   -- we got an event on a hidden button
@@ -388,7 +388,7 @@ function tracker.ButtonEvent(self)
     if not qlogid or not qtitle then return end
     local objectives = GetNumQuestLeaderBoards(qlogid)
     local watched = IsQuestWatched(qlogid)
-    local color = GetDifficultyColor(level)
+    local color = pfQuestCompat.GetDifficultyColor(level)
     local cur,max = 0,0
     local percent = 0
 
@@ -460,7 +460,7 @@ function tracker.ButtonEvent(self)
     self.tooltip = pfQuest_Loc["|cff33ffcc<Click>|r Unfold/Fold Objectives\n|cff33ffcc<Right-Click>|r Show In QuestLog\n|cff33ffcc<Ctrl-Click>|r Show Map / Toggle Color\n|cff33ffcc<Shift-Click>|r Hide Nodes"]
   elseif tracker.mode == "GIVER_TRACKING" then
     local level = node.qlvl or node.level or UnitLevel("player")
-    local color = GetDifficultyColor(level)
+    local color = pfQuestCompat.GetDifficultyColor(level)
 
     -- red quests
     if node.qmin and node.qmin > UnitLevel("player") then
@@ -519,12 +519,11 @@ end
 
 function tracker.ButtonAdd(title, ttitle, node)
   if not title or not node then return end
+
   local questid = title
   for qid, data in pairs(pfQuest.questlog) do
-	-- DEFAULT_CHAT_FRAME:AddMessage(title)
-	-- DEFAULT_CHAT_FRAME:AddMessage(data.title)
     if data.title == title or data.title == ttitle then
-	  questid = qid
+      questid = qid
       break
     end
   end
@@ -638,9 +637,7 @@ function tracker.Reset()
   -- iterate over all quests
   for qlogid=1,40 do
     local title, level, tag, header, collapsed, complete = compat.GetQuestLogTitle(qlogid)
-	
 	local ttitle = cnenQuestTitle(title, "entocn")
-
     if title and not header then
       local watched = IsQuestWatched(qlogid)
       if watched then

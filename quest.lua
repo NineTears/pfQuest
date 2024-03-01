@@ -22,12 +22,12 @@ local cnenQuestTitle = cnenQuestTitle or cnenQuestTitleBack
 pfQuest = CreateFrame("Frame")
 pfQuest.icons = {}
 
-if client > 11200 then
-  -- tbc
-  pfQuest.dburl = "https://tbc-twinhead.twinstar.cz/?quest="
+if client >= 30300 then
+  pfQuest.dburl = "https://www.wowhead.com/wotlk/quest="
+elseif client >= 20400 then
+  pfQuest.dburl = "https://www.wowhead.com/tbc/quest="
 else
-  -- vanilla
-  pfQuest.dburl = "https://vanilla-twinhead.twinstar.cz/?quest="
+  pfQuest.dburl = "https://www.wowhead.com/classic/quest="
 end
 
 function pfQuest:Debug(msg)
@@ -366,7 +366,7 @@ function pfQuest:AddQuestLogIntegration()
   if pfQuest_config["questlogbuttons"] ==  "0" then return end
 
   local dockFrame = EQL3_QuestLogDetailScrollChildFrame or ShaguQuest_QuestLogDetailScrollChildFrame or QuestLogDetailScrollChildFrame
-  local dockTitle = EQL3_QuestLogDescriptionTitle or ShaguQuest_QuestLogDescriptionTitle or QuestLogDescriptionTitle
+  local dockTitle = EQL3_QuestLogDescriptionTitle or ShaguQuest_QuestLogDescriptionTitle or pfQuestCompat.QuestLogDescriptionTitle
 
   dockTitle:SetHeight(dockTitle:GetHeight() + 30)
   dockTitle:SetJustifyV("BOTTOM")
@@ -436,10 +436,11 @@ function pfQuest:AddQuestLogIntegration()
     end
 
     if id and pfDB["quests"][lang] and pfDB["quests"][lang][id] then
-      local QuestLogQuestTitle = EQL3_QuestLogQuestTitle or QuestLogQuestTitle
-      local QuestLogObjectivesText = EQL3_QuestLogObjectivesText or QuestLogObjectivesText
-      local QuestLogQuestDescription = EQL3_QuestLogQuestDescription or QuestLogQuestDescription
+      local QuestLogQuestTitle = EQL3_QuestLogQuestTitle or pfQuestCompat.QuestLogQuestTitle
+      local QuestLogObjectivesText = EQL3_QuestLogObjectivesText or pfQuestCompat.QuestLogObjectivesText
+      local QuestLogQuestDescription = EQL3_QuestLogQuestDescription or pfQuestCompat.QuestLogQuestDescription
       local QuestLogDetailScrollFrame = EQL3_QuestLogDetailScrollFrame or QuestLogDetailScrollFrame
+
       QuestLogQuestTitle:SetText(pfDatabase:FormatQuestText(pfDB["quests"][lang][id]["T"]))
       QuestLogObjectivesText:SetText(pfDatabase:FormatQuestText(pfDB["quests"][lang][id]["O"]))
       QuestLogQuestDescription:SetText(pfDatabase:FormatQuestText(pfDB["quests"][lang][id]["D"]))
@@ -563,9 +564,15 @@ function pfQuest:AddWorldMapIntegration()
     end
 
     UIDropDownMenu_Initialize(pfQuest.mapButton, CreateEntries)
-    UIDropDownMenu_SetWidth(120, pfQuest.mapButton)
-    UIDropDownMenu_SetButtonWidth(125, pfQuest.mapButton)
-    UIDropDownMenu_JustifyText("RIGHT", pfQuest.mapButton)
+    if client >= 30300 then
+      UIDropDownMenu_SetWidth(pfQuest.mapButton, 120)
+      UIDropDownMenu_SetButtonWidth(pfQuest.mapButton, 125)
+      UIDropDownMenu_JustifyText(pfQuest.mapButton, "RIGHT")
+    else
+      UIDropDownMenu_SetWidth(120, pfQuest.mapButton)
+      UIDropDownMenu_SetButtonWidth(125, pfQuest.mapButton)
+      UIDropDownMenu_JustifyText("RIGHT", pfQuest.mapButton)
+    end
     UIDropDownMenu_SetSelectedID(pfQuest.mapButton, pfQuest.mapButton.current)
   end
 end
@@ -603,27 +610,31 @@ AbandonQuest = function()
   HookAbandonQuest()
 end
 
+local function UpdateQuestLevel(button, id)
+  local title, level, tag, header = compat.GetQuestLogTitle(id)
+  title = cnenQuestTitle(title, "entocn")
+  if header or not title then return end
+  button:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title)
+  if not QuestLogTitleButton_Resize then return end
+  QuestLogTitleButton_Resize(button)
+end
+
 -- Update quest id button
 local pfHookQuestLog_Update = QuestLog_Update
 QuestLog_Update = function()
   pfHookQuestLog_Update()
 
-    for i=1, QUESTS_DISPLAYED, 1 do
-      local display = i + FauxScrollFrame_GetOffset(QuestLogListScrollFrame)
-      local entries = GetNumQuestLogEntries()
-
-      if display <= entries then
-        local title, level, tag, header = compat.GetQuestLogTitle(display)
-		title = cnenQuestTitle(title, "entocn")
-        if not header then
-			if pfQuest_config["questloglevel"] == "1" then
-				_G["QuestLogTitle"..i]:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title) ----================2023.11.10================----
-			else
-				_G["QuestLogTitle"..i]:SetText(title) ----================2023.11.10================----
-			end
-        end
+  if pfQuest_config["questloglevel"] == "1" then
+    if client >= 30300 then
+      for i, button in pairs(QuestLogScrollFrame.buttons) do
+        UpdateQuestLevel(button, button:GetID())
+      end
+    else
+      for i=1, QUESTS_DISPLAYED, 1 do
+        UpdateQuestLevel(_G["QuestLogTitle"..i], i + FauxScrollFrame_GetOffset(QuestLogListScrollFrame))
       end
     end
+  end
 
   if pfQuest_config["questlogbuttons"] ==  "1" then
     local questids = pfDatabase:GetQuestIDs(GetQuestLogSelection())
@@ -647,6 +658,18 @@ QuestLog_Update = function()
       pfQuest.buttonHide:Disable()
     end
   end
+end
+
+-- attach the new function to the scroll frame
+if QuestLogScrollFrame then
+  QuestLogScrollFrame.update = QuestLog_Update
+end
+
+-- refresh language and url on quest selection
+local pfHookQuestLogTitleButton_OnClick = QuestLogTitleButton_OnClick
+QuestLogTitleButton_OnClick = function(self, button)
+  pfHookQuestLogTitleButton_OnClick(self, button)
+  QuestLog_Update()
 end
 
 if not GetQuestLink then -- Allow to send questlinks from questlog
@@ -704,7 +727,7 @@ if not GetQuestLink then -- Allow to send questlinks from questlog
       -- read and set title
       if id and id > 0 and pfDB["quests"]["loc"][id] then
         local questlevel = tonumber(pfDB["quests"]["data"][id]["lvl"])
-        local color = GetDifficultyColor(questlevel)
+        local color = pfQuestCompat.GetDifficultyColor(questlevel)
         ItemRefTooltip:AddLine(pfDB["quests"]["loc"][id].T, color.r, color.g, color.b)
       elseif hasTitle then
         ItemRefTooltip:AddLine(questTitle, 1,1,0)
@@ -742,13 +765,13 @@ if not GetQuestLink then -- Allow to send questlinks from questlog
 
         if pfDB["quests"]["data"][id]["min"] then
           local questlevel = tonumber(pfDB["quests"]["data"][id]["min"])
-          local color = GetDifficultyColor(questlevel)
+          local color = pfQuestCompat.GetDifficultyColor(questlevel)
           ItemRefTooltip:AddLine("|cffffffff" .. pfQuest_Loc["Required Level"] .. ": |r" .. questlevel, color.r, color.g, color.b)
         end
 
         if pfDB["quests"]["data"][id]["lvl"] then
           local questlevel = tonumber(pfDB["quests"]["data"][id]["lvl"])
-          local color = GetDifficultyColor(questlevel)
+          local color = pfQuestCompat.GetDifficultyColor(questlevel)
           ItemRefTooltip:AddLine("|cffffffff" .. pfQuest_Loc["Quest Level"] .. ": |r" .. questlevel, color.r, color.g, color.b)
         end
       end
@@ -775,7 +798,7 @@ else
     -- adjust text color to level color
     if id and id > 0 and pfDB["quests"]["loc"][id] then
       local questlevel = tonumber(pfDB["quests"]["data"][id]["lvl"])
-      local color = GetDifficultyColor(questlevel)
+      local color = pfQuestCompat.GetDifficultyColor(questlevel)
       ItemRefTooltipTextLeft1:SetTextColor(color.r, color.g, color.b)
     end
 
@@ -785,13 +808,13 @@ else
 
       if pfDB["quests"]["data"][id]["min"] then
         local questlevel = tonumber(pfDB["quests"]["data"][id]["min"])
-        local color = GetDifficultyColor(questlevel)
+        local color = pfQuestCompat.GetDifficultyColor(questlevel)
         ItemRefTooltip:AddLine("|cffffffff" .. pfQuest_Loc["Required Level"] .. ": |r" .. questlevel, color.r, color.g, color.b)
       end
 
       if pfDB["quests"]["data"][id]["lvl"] then
         local questlevel = tonumber(pfDB["quests"]["data"][id]["lvl"])
-        local color = GetDifficultyColor(questlevel)
+        local color = pfQuestCompat.GetDifficultyColor(questlevel)
         ItemRefTooltip:AddLine("|cffffffff" .. pfQuest_Loc["Quest Level"] .. ": |r" .. questlevel, color.r, color.g, color.b)
       end
     end
