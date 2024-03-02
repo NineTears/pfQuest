@@ -612,9 +612,13 @@ end
 
 local function UpdateQuestLevel(button, id)
   local title, level, tag, header = compat.GetQuestLogTitle(id)
-  title = cnenQuestTitle(title, "entocn")
   if header or not title then return end
-  button:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title)
+  title = cnenQuestTitle(title, "entocn")
+  if pfQuest_config["questloglevel"] == "1" then
+    button:SetText(" [" .. ( level or "??" ) .. ( tag and "+" or "") .. "] " .. title)
+  else
+    button:SetText(title)
+  end
   if not QuestLogTitleButton_Resize then return end
   QuestLogTitleButton_Resize(button)
 end
@@ -624,7 +628,7 @@ local pfHookQuestLog_Update = QuestLog_Update
 QuestLog_Update = function()
   pfHookQuestLog_Update()
 
-  if pfQuest_config["questloglevel"] == "1" then
+  -- if pfQuest_config["questloglevel"] == "1" then
     if client >= 30300 then
       for i, button in pairs(QuestLogScrollFrame.buttons) do
         UpdateQuestLevel(button, button:GetID())
@@ -634,7 +638,7 @@ QuestLog_Update = function()
         UpdateQuestLevel(_G["QuestLogTitle"..i], i + FauxScrollFrame_GetOffset(QuestLogListScrollFrame))
       end
     end
-  end
+  -- end
 
   if pfQuest_config["questlogbuttons"] ==  "1" then
     local questids = pfDatabase:GetQuestIDs(GetQuestLogSelection())
