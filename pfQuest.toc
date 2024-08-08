@@ -1,6 +1,6 @@
 ## Interface: 11200
-## Title: |cff33ffccpf|cffffffffQuest|R |cffff1450[红星4.08]|R
-## Title-zhCN: |cff33ffccpf|cffffffffQuest|R |cffff1450[红星4.08]|R
+## Title: |cff33ffccpf|cffffffffQuest|R |cffff1450[红星4.09]|R
+## Title-zhCN: |cff33ffccpf|cffffffffQuest|R |cffff1450[红星4.09]|R
 ## Author: Shagu, Wind&呲不鸟&名字不好起修改
 ## Notes: |cff33ffccpf|cffffffffQuest|R |cffff1450[红星]|R由|cff33ffccWind|R&|cff33ffcc呲不鸟|R&|cff33ffcc名字不好起|R修改汉化。|N本插件完全免费，请勿在第三方购买！
 ## Notes-zhCN: |cff33ffccpf|cffffffffQuest|R |cffff1450[红星]|R由|cff33ffccWind|R&|cff33ffcc呲不鸟|R&|cff33ffcc名字不好起|R修改汉化。|N本插件完全免费，请勿在第三方购买！
