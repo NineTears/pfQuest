@@ -557,7 +557,7 @@ function pfDatabase:GetRaceMaskByID(id, db)
   local raceMask = 0
 
   if db == "quests" then
-    if quests[id] then
+    if quests[id] then			--解决当ID不存在时报错
 		raceMask = quests[id]["race"] or raceMask
     end
 
