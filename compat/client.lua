@@ -83,8 +83,8 @@ end
 -- vanilla: overwrite the out-of-memory popup on vanilla clients, to provide some help
 -- on how to increase the limits, and also displaying a link to an example.
 if client <= 11200 then
-  local memlimit = "The user interface is using more than %dMB of memory.\n\n" ..
-    "Set '|cffffee55Script Memory|r' to '|cffffee550|r' in the character selection screen:"
+  local memlimit = "插件占用的内存已经超过 %dMB 。\n\n" ..
+    "在角色选择界面，点击左下角的'|cffffee55【插件】|r'按钮，将 '|cffffee55插件内存|r' 设置为 '|cffffee550|r' :"
 
   local striptex = function(frame)
     for _,v in ipairs({frame:GetRegions()}) do
