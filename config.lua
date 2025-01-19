@@ -463,26 +463,17 @@ do -- welcome/init popup dialog
   pfQuestInit:SetWidth(400)
   pfQuestInit:SetHeight(270)
   pfQuestInit:SetPoint("CENTER", 0, 0)
-  pfQuestInit:RegisterEvent("PLAYER_ENTERING_WORLD")
-  pfQuestInit:SetScript("OnEvent", function()
-    if pfQuest_config.welcome ~= "1" then
-      -- parse current config
-      if pfQuest_config["showspawn"] == "0" and pfQuest_config["showcluster"] == "1" then
-        config_stage.mode = 1
-      elseif pfQuest_config["showspawn"] == "1" and pfQuest_config["showcluster"] == "0" then
-        config_stage.mode = 3
-      end
-
-      if pfQuest_config["arrow"] == "0" then
-        config_stage.arrow = nil
-      end
-
-      pfQuestInit:Show()
-    end
-    this:UnregisterAllEvents()
-  end)
-
+  
+  -- 移除PLAYER_ENTERING_WORLD事件注册,改为直接设置默认配置（取消显示首次登陆初始化窗口）
   pfQuestInit:SetScript("OnShow", function()
+    -- 设置默认配置
+    pfQuest_config["showspawn"] = "1"
+    pfQuest_config["showspawnmini"] = "1" 
+    pfQuest_config["showcluster"] = "1"
+    pfQuest_config["showclustermini"] = "0"
+    pfQuest_config["arrow"] = "1"
+    pfQuest_config["welcome"] = "1"
+    
     -- reload ui elements
     pfQuestInit[1].bg:SetDesaturated(true)
     pfQuestInit[2].bg:SetDesaturated(true)
